@@ -1,49 +1,46 @@
-# Byte-compiled / optimized / DLL files
+# Python Core
 __pycache__/
 *.py[cod]
 *$py.class
-
-# C extensions
 *.so
 
-# Distribution / packaging
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
-
-# Virtual Environments
+# Environments
+.env
+.venv
 venv/
 ENV/
 env/
-.env
+python/
 
-# Streamlit logs/cache
+# AWS Elastic Beanstalk
+.elasticbeanstalk/
+
+# Datasets & Large Files
+data/*.csv
+data/*.xlsx
+data/*.json
+
+# Model Artifacts (Optional: Some keep them in Git, but usually ignored if large)
+# model/*.pkl
+
+# Streamlit
 .streamlit/
-app_log.log
 
-# Large Datasets (Required for local training, should be hosted in S3 for Cloud)
-data/Fake.csv
-data/True.csv
-data/news.csv
-
-# Jupyter Notebook checkpoints
+# Jupyter Notebooks
 .ipynb_checkpoints/
+notebooks/*.ipynb
 
-# Operating System Files
+# OS / IDE
 .DS_Store
 Thumbs.db
+.vscode/
+.idea/
+.devcontainer/
+
+# Project Specific Unwanted Files
+api.py
+Dockerfile
+project_walkthrough.md
+walkthrough.md
+*log.txt
+*.log

@@ -1,11 +1,6 @@
-pandas
-numpy
-scikit-learn
-nltk
-streamlit
-joblib
-fastapi
-uvicorn
-python-multipart
 flask
+flask-cors
 gunicorn
+scikit-learn
+joblib
+numpy
