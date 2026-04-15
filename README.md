@@ -1,77 +1,59 @@
 # 🛡️ FactCheck AI: Cloud-Integrated Content Verification Service
 
-> **Status:** Production-Ready | **Accuracy:** 99.5% | **Architecture:** Cloud-Native / MLaaS
-> **Project:** Mobile and Cloud Application Development Lab (22MDC65)
+> **Project Title:** FactCheck AI | **Status:** Production-Ready | **Accuracy:** 99.5%
 
-## 📁 1. Project Directory Structure
-```text
-fake-news-detection/
-├── app/
-│   └── app.py            # FactCheck AI Premium Dashboard (UI)
-├── data/
-│   ├── Fake.csv          # Fabricated news corpus
-│   └── True.csv          # Factual news corpus
-├── model/
-│   ├── model.pkl         # Trained PAC Model artifacts
-│   └── vectorizer.pkl    # TF-IDF Vectorization weights
-├── src/
-│   ├── preprocessing.py  # NLP cleaning logic
-│   ├── predict.py        # Real-time inference logic
-│   └── train.py          # ML Training Engine (99.5% Accuracy)
-├── api.py                # RESTful Cloud Service Backend
-├── Dockerfile            # Cloud Portability config
-├── requirements.txt      # Project dependencies
-└── README.md             # Detailed Project Guide
-```
+## 📝 1. What is FactCheck AI?
+It is a high-fidelity **Fake News Detection** system that uses Natural Language Processing (NLP) to verify content as authentic or fabricated.
+- **AI Engine**: Passive Aggressive Classifier.
+- **Training Corpus**: 44,800 news articles.
+- **Goal**: Differentiate sensationalist misinformation from factual reporting.
 
 ---
 
-## 🏗️ 2. What is FactCheck AI?
-It is a state-of-the-art **Fake News Detection System** using Natural Language Processing (NLP) to verify content authenticity. 
-- **The Core**: Uses a **Passive Aggressive Classifier** retrained on over **44,800 news articles**.
-- **The Result**: Achieves **99.5% accuracy** by analyzing linguistic variance—identifying sensationalist patterns common in fake news compared to neutral factual reporting.
+## 🏗️ 2. How the Model & Dataset are Deployed
+In a professional cloud environment, deployment is split into two parts:
+
+### **A. Training (Preprocessing Stage)**
+- The large datasets (`True.csv` and `Fake.csv`) are approximately **120MB**.
+- These are used **only once** to train the model locally. 
+- During training, the system "learns" the patterns and saves them into two small files: **`model.pkl`** and **`vectorizer.pkl`**.
+- **Important**: Once you have these `.pkl` files, you do not need the large CSV files to run the app.
+
+### **B. Inference (Live Stage)**
+- When you deploy to the Cloud, we only upload the logic (`app.py`, `src/`) and the intelligence (`model/*.pkl`).
+- The cloud server loads the `.pkl` file into its memory (RAM). When a user enters text, the model uses these saved weights to provide an instant prediction.
+- This results in a **highly lightweight and fast cloud service**.
 
 ---
 
-## 🚀 3. Professional Deployment Guide (Free)
-The most efficient way to deploy this Cloud project for a live demo is using **GitHub** and **Streamlit Community Cloud**. This provides a public URL at zero cost.
+## 🚀 3. Deployment Guide (Free)
 
-### **Phase 1: Preparation**
-1. Ensure your project is organized as per the structure above.
-2. Run `pip freeze > requirements.txt` to ensure all dependencies are locked.
+### **Phase 1: GitHub Setup**
+1. Upload all files **EXCEPT** the large `data/` folder to GitHub. (The `.gitignore` file I provided will help with this automatically).
+2. Your GitHub should include: `app/`, `src/`, `model/`, `requirements.txt`, and `api.py`.
 
-### **Phase 2: GitHub Repository Setup**
-1. Create a new repository on [GitHub](https://github.com/) (e.g., `factcheck-ai`).
-2. Initialize Git in your project folder:
-   ```bash
-   git init
-   git add .
-   git commit -m "Initialize FactCheck AI project"
-   ```
-3. Link to your GitHub repo and push:
-   ```bash
-   git remote add origin https://github.com/YOUR_USERNAME/factcheck-ai.git
-   git push -u origin main
-   ```
-
-### **Phase 3: Streamlit Cloud Deployment**
-1. Login to [Streamlit Cloud](https://share.streamlit.io/) using your GitHub account.
-2. Click **"Create app"**.
-3. Select the `factcheck-ai` repository and the `main` branch.
-4. Set the "Main file path" to: `app/app.py`.
-5. Click **"Deploy!"**. 
-6. Your application will be live in minutes at a URL like `https://factcheck-ai.streamlit.app`.
+### **Phase 2: Streamlit Cloud**
+1. Connect your repo at [share.streamlit.io](https://share.streamlit.io/).
+2. Deploy using `app/app.py`.
 
 ---
 
-## 📊 4. Machine Learning execution
-- **Algorithm**: Passive Aggressive Classifier (Optimized for cloud-scale text).
-- **Metric**: **99.5% Accuracy**.
-- **Latency**: Sub-100ms inference time.
+## ⚠️ 4. Troubleshooting "Error Installing Requirements"
+If your deployment fails during installation:
+1. **Remove Version Numbers**: Ensure your `requirements.txt` only lists package names (e.g., `pandas`, not `pandas==1.5.0`). I have updated it for you.
+2. **Delete Data Folder**: Do not push the 120MB CSV files to GitHub. Large files can cause server timeouts during the environment build phase.
+3. **NLTK Data**: The system automatically downloads NLTK stopwords on the first run.
 
 ---
 
-## ✅ 5. Academic Credentials
+## 📊 5. Machine Learning Specs
+- **Algorithm**: Passive Aggressive Classifier.
+- **Accuracy**: 99.5%.
+- **Latency**: Sub-100ms.
+
+---
+
+## ✅ 6. Academic Credentials
 - **Lead Contributors**: DHANUSHYA E & DHARANESH VN
 - **Registration**: 2303717673722009 / 2303717673721010
 - **Faculty Board**: DR. SAVITHRI V, DR. CHANDIA S, DR. KAMATCHI A
