@@ -7,3 +7,5 @@ joblib
 fastapi
 uvicorn
 python-multipart
+flask
+gunicorn
