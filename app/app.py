@@ -1,166 +1,252 @@
 import streamlit as st
-import requests
+import sys
 import os
 
+# ---------------------------------------------------------
+# Local Model Integration
+# ---------------------------------------------------------
+current_dir = os.path.dirname(os.path.abspath(__file__))
+src_path = os.path.join(current_dir, '..', 'src')
+if src_path not in sys.path:
+    sys.path.append(src_path)
+
+try:
+    from predict import predict_news
+except ImportError:
+    def predict_news(text): return "ERROR"
+
+# ---------------------------------------------------------
 # Page Configuration
-st.set_page_config(page_title="FactCheck AI | Cloud Dashboard", layout="wide", initial_sidebar_state="collapsed")
+# ---------------------------------------------------------
+st.set_page_config(
+    page_title="FactCheck AI",
+    layout="centered",
+    initial_sidebar_state="collapsed"
+)
 
-# API Configuration
-API_URL = "http://factcheck-prod.eba-shmkjjex.us-east-1.elasticbeanstalk.com/predict"
-
-# Custom CSS for Professional Lavender Theme
+# ---------------------------------------------------------
+# CSS
+# ---------------------------------------------------------
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+    html, body, .stApp { background-color: #f8f9fc !important; }
+    header, #MainMenu, footer { visibility: hidden; }
+    .block-container { padding-top: 0 !important; padding-bottom: 2rem !important; }
 
-    html, body, [class*="css"] {
-        font-family: 'Inter', sans-serif;
-    }
-
-    /* Navbar */
-    .stApp { background-color: #f5f0fb; }
-    
-    header[data-testid="stHeader"] { display: none !important; }
-
-    .navbar {
-        background-color: #6C48C5;
-        padding: 16px 40px;
-        color: white;
+    /* ── Navbar wrapper ── */
+    .topbar {
+        background: #ffffff;
+        border-bottom: 1px solid #e5e7eb;
+        height: 64px;
         display: flex;
-        justify-content: space-between;
         align-items: center;
-        margin-bottom: 2rem;
+        justify-content: space-between;
+        padding: 0 8px;
+        margin-bottom: 36px;
     }
-
-    .brand {
-        font-size: 24px;
-        font-weight: 600;
+    .topbar-brand {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #6C48C5;
         letter-spacing: -0.02em;
     }
 
-    /* Main Container */
-    .main-body {
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 0 20px;
-    }
-
-    .card {
-        background: white;
-        padding: 40px;
-        border-radius: 14px;
-        border: 1px solid #e2d8f5;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.02);
-    }
-
-    /* Input Area */
-    .stTextArea textarea {
-        border: 1.5px solid #d5c8f0 !important;
-        background-color: #faf8ff !important;
-        border-radius: 10px !important;
-        font-size: 16px !important;
-    }
-
-    /* Buttons */
-    .stButton > button {
-        background-color: #6C48C5 !important;
-        color: white !important;
-        border-radius: 8px !important;
-        padding: 12px 28px !important;
-        font-weight: 600 !important;
+    /* ── Nav buttons: make them ghost/link-style ── */
+    div[data-testid="column"] .stButton > button {
+        background: transparent !important;
+        color: #6b7280 !important;
         border: none !important;
-        width: 100% !important;
-    }
-
-    .nav-btn > button {
+        box-shadow: none !important;
+        padding: 6px 14px !important;
+        font-size: 0.875rem !important;
+        font-weight: 500 !important;
+        border-radius: 6px !important;
+        margin-top: 0 !important;
         width: auto !important;
-        background: rgba(255,255,255,0.18) !important;
-        border: 1.5px solid rgba(255,255,255,0.4) !important;
-        font-size: 14px !important;
-        padding: 4px 16px !important;
     }
 
-    /* Results */
-    .result-box {
-        padding: 20px;
+    div[data-testid="column"] .stButton > button:hover {
+        background: #f3f4f6 !important;
+        color: #6C48C5 !important;
+    }
+
+    /* Active nav button */
+    .active-tab .stButton > button {
+        background: #f3f4f6 !important;
+        color: #6C48C5 !important;
+    }
+
+    /* ── Typography ── */
+    h2 {
+        font-size: 2.25rem !important;
+        font-weight: 800 !important;
+        color: #1a1a1a !important;
+        text-align: center;
+        letter-spacing: -0.04em;
+        margin-bottom: 4px !important;
+    }
+    .sub-text {
+        text-align: center;
+        color: #6b7280;
+        font-size: 1rem;
+        margin-bottom: 32px;
+    }
+
+    /* ── Card ── */
+    .fc-card {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 36px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .fc-label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #1a1a1a;
+        margin-bottom: 10px;
+        display: block;
+    }
+
+    /* ── Textarea ── */
+    .stTextArea textarea {
+        background-color: #ffffff !important;
+        color: #1a1a1a !important;
+        -webkit-text-fill-color: #1a1a1a !important;
+        border: 1px solid #e5e7eb !important;
+        border-radius: 8px !important;
+        padding: 14px !important;
+        font-size: 1rem !important;
+    }
+    .stTextArea textarea::placeholder {
+        color: #9ca3af !important;
+        opacity: 1 !important;
+    }
+
+    /* ── Execute Button ONLY (full-width purple) ── */
+    .exec-btn .stButton > button {
+        background-color: #6C48C5 !important;
+        color: #ffffff !important;
+        width: auto !important;
+        padding: 10px 28px !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        font-size: 0.875rem !important;
+        margin-top: 14px !important;
+    }
+    .exec-btn .stButton > button:hover {
+        background-color: #5a3aad !important;
+    }
+
+    /* ── Result boxes ── */
+    .result {
+        margin-top: 28px;
+        padding: 22px;
         border-radius: 10px;
         text-align: center;
-        font-weight: 600;
-        margin-top: 20px;
-        font-size: 18px;
     }
-    .real { background-color: #edf8f1; color: #1b6e3b; border: 1.5px solid #74c69d; }
-    .fake { background-color: #fef0f0; color: #a42020; border: 1.5px solid #e86b6b; }
+    .result-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 4px; }
+    .result-desc  { font-size: 0.875rem; }
+    .res-real { background:#ecfdf5; border:1px solid #10b981; color:#064e3b; }
+    .res-fake { background:#fef2f2; border:1px solid #ef4444; color:#7f1d1d; }
+
+    /* ── Registry table ── */
+    .reg-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 0;
+        border-bottom: 1px solid #f3f4f6;
+    }
+    .reg-row:last-child { border-bottom: none; }
+    .reg-k { font-size:0.72rem; color:#6b7280; text-transform:uppercase; font-weight:600; letter-spacing:0.05em; }
+    .reg-v { font-size:0.95rem; font-weight:500; color:#1a1a1a; }
 </style>
 """, unsafe_allow_html=True)
 
-# Session State for Navigation
-if 'page' not in st.session_state:
-    st.session_state.page = 'AI'
+# ---------------------------------------------------------
+# Session State
+# ---------------------------------------------------------
+if "page" not in st.session_state:
+    st.session_state.page = "AI"
 
-# Top Bar
-st.markdown('<div class="navbar"><span class="brand">FactCheck AI</span></div>', unsafe_allow_html=True)
+# ---------------------------------------------------------
+# Navbar  (HTML brand + st.button nav links)
+# ---------------------------------------------------------
+st.markdown('<div class="topbar"><span class="topbar-brand">FactCheck AI</span></div>', unsafe_allow_html=True)
 
-# Navigation Buttons at the top right (using Streamlit columns)
-t_col1, t_col2 = st.columns([6, 1])
-with t_col2:
-    n_col1, n_col2 = st.columns(2)
-    with n_col1:
-        if st.button("AI", key="ai_nav"):
-            st.session_state.page = 'AI'
-    with n_col2:
-        if st.button("About", key="about_nav"):
-            st.session_state.page = 'About'
+# Place nav buttons in a row flush with the right
+_, nav1_col, nav2_col = st.columns([6, 1, 1.2])
 
-# Page Rendering
-if st.session_state.page == 'AI':
-    st.markdown("<div class='main-body'>", unsafe_allow_html=True)
-    st.markdown("<h1>Linguistic Analysis</h1>", unsafe_allow_html=True)
-    st.markdown("<p style='color:#666;'>Cloud-based verified content verification</p>", unsafe_allow_html=True)
-    
-    with st.container():
-        st.markdown("<div class='card'>", unsafe_allow_html=True)
-        user_input = st.text_area("Input Content", label_visibility="collapsed", placeholder="Paste news content here for factual verification...", height=250)
-        
-        if st.button("Analyze Content", type="primary"):
-            if user_input.strip():
-                with st.spinner("Calling Cloud API..."):
-                    try:
-                        response = requests.post(API_URL, json={"text": user_input})
-                        data = response.json()
-                        
-                        if data.get("prediction") == "REAL":
-                            st.markdown('<div class="result-box real">Verification Successful — Content Appears Authentic</div>', unsafe_allow_html=True)
-                        else:
-                            st.markdown('<div class="result-box fake">Verification Failed — Content may be Fabricated</div>', unsafe_allow_html=True)
-                    except Exception as e:
-                        st.error("Error connecting to the API. Ensure your Elastic Beanstalk service is running.")
-            else:
-                st.warning("Please provide content to analyze.")
-        st.markdown("</div>", unsafe_allow_html=True)
+with nav1_col:
+    a_class = "active-tab" if st.session_state.page == "AI" else ""
+    st.markdown(f'<div class="{a_class}">', unsafe_allow_html=True)
+    if st.button("AI", key="nav_ai"):
+        st.session_state.page = "AI"
     st.markdown("</div>", unsafe_allow_html=True)
 
-elif st.session_state.page == 'About':
-    st.markdown("<div class='main-body'>", unsafe_allow_html=True)
-    st.markdown("<h1>Project Registry</h1>", unsafe_allow_html=True)
-    
-    with st.container():
-        st.markdown("<div class='card'>", unsafe_allow_html=True)
-        details = [
-            ("Student", "Dhanushya E"),
-            ("Register No.", "2303717673722009"),
-            ("Student", "Dharanesh VN"),
-            ("Register No.", "2303717673721010"),
-            ("Subject", "Mobile and Cloud Application Development Lab (22MDC65)"),
-            ("Supervision", "Dr. Savithri V, Dr. Chandia S, Dr. Kamatchi A")
-        ]
-        
-        for k, v in details:
-            st.markdown(f"""
-            <div style='padding: 15px 0; border-bottom: 1px solid #e2d8f5;'>
-                <div style='font-size: 12px; color: #9a8ec2; text-transform: uppercase;'>{k}</div>
-                <div style='font-size: 18px; font-weight: 500;'>{v}</div>
-            </div>
-            """, unsafe_allow_html=True)
-        st.markdown("</div>", unsafe_allow_html=True)
+with nav2_col:
+    i_class = "active-tab" if st.session_state.page == "About" else ""
+    st.markdown(f'<div class="{i_class}">', unsafe_allow_html=True)
+    if st.button("About", key="nav_about"):
+        st.session_state.page = "About"
+    st.markdown("</div>", unsafe_allow_html=True)
+
+# ---------------------------------------------------------
+# AI Page
+# ---------------------------------------------------------
+if st.session_state.page == "AI":
+    st.markdown("<h2>Linguistic Analysis</h2>", unsafe_allow_html=True)
+    st.markdown('<p class="sub-text">Proprietary cloud engine for factual verification.</p>', unsafe_allow_html=True)
+
+    st.markdown('<div class="fc-card"><span class="fc-label">Article Content</span>', unsafe_allow_html=True)
+    user_text = st.text_area("_", placeholder="Input the text volume for verification...",
+                              label_visibility="collapsed", height=200)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    st.markdown('<div class="exec-btn">', unsafe_allow_html=True)
+    run = st.button("Execute Verification", key="exec")
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    if run:
+        if user_text.strip():
+            with st.spinner("Analyzing..."):
+                result = predict_news(user_text)
+            if result == "REAL":
+                st.markdown("""
+                <div class="result res-real">
+                    <div class="result-title">AUTHENTIC CONTENT</div>
+                    <div class="result-desc">Linguistic patterns align with factual reporting standards.</div>
+                </div>""", unsafe_allow_html=True)
+            else:
+                st.markdown("""
+                <div class="result res-fake">
+                    <div class="result-title">FABRICATED CONTENT</div>
+                    <div class="result-desc">Linguistic indicators suggest sensationalism or misinformation.</div>
+                </div>""", unsafe_allow_html=True)
+        else:
+            st.warning("Please provide input text for analysis.")
+
+# ---------------------------------------------------------
+# About Page
+# ---------------------------------------------------------
+elif st.session_state.page == "About":
+    st.markdown("<h2>Project Registry</h2>", unsafe_allow_html=True)
+    st.markdown('<p class="sub-text">Academic documentation and institutional details.</p>', unsafe_allow_html=True)
+
+    rows = [
+        ("Organization",    "Mobile and Cloud Application Lab"),
+        ("Subject Code",    "22MDC65"),
+        ("Research Lead",   "Dhanushya E (2303717673722009)"),
+        ("Research Lead",   "Dharanesh VN (2303717673721010)"),
+        ("Supervision",     "Dr. Savithri V, Dr. Chandia S, Dr. Kamatchi A"),
+    ]
+
+    st.markdown('<div class="fc-card">', unsafe_allow_html=True)
+    for k, v in rows:
+        st.markdown(f"""
+        <div class="reg-row">
+            <span class="reg-k">{k}</span>
+            <span class="reg-v">{v}</span>
+        </div>""", unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)

@@ -8,6 +8,7 @@
         :root {
             --primary: #6C48C5;
             --primary-dark: #5a3aad;
+            --btn-dark: #111827;
             --bg-main: #f8f9fc;
             --bg-card: #ffffff;
             --text-primary: #1a1a1a;
@@ -59,23 +60,23 @@
 
         .nav-link {
             text-decoration: none;
-            color: var(--text-secondary);
-            font-size: 0.875rem;
-            font-weight: 500;
-            padding: 8px 16px;
-            border-radius: 6px;
+            color: #ffffff;
+            background-color: var(--btn-dark);
+            font-size: 0.8125rem;
+            font-weight: 600;
+            padding: 8px 18px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: opacity 0.2s;
         }
 
         .nav-link:hover {
-            color: var(--primary);
-            background-color: #f3f4f6;
+            opacity: 0.9;
         }
 
         .nav-link.active {
-            color: var(--primary);
-            background-color: #f3f4f6;
+            background-color: var(--btn-dark);
+            opacity: 1;
         }
 
         /* Main Content */
@@ -156,20 +157,23 @@
         }
 
         .btn-analyze {
-            background-color: var(--primary);
+            background-color: var(--btn-dark);
             color: white;
             border: none;
-            width: 100%;
-            padding: 14px;
+            width: auto;
+            padding: 12px 24px;
             border-radius: 8px;
-            font-size: 1rem;
+            font-size: 0.875rem;
             font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: opacity 0.2s;
+            white-space: nowrap;
+            display: inline-block;
+            margin-top: 12px;
         }
 
         .btn-analyze:hover {
-            background-color: var(--primary-dark);
+            opacity: 0.9;
         }
 
         .btn-analyze:disabled {
@@ -246,8 +250,8 @@
     <nav class="navbar">
         <div class="brand-logo">FactCheck AI</div>
         <div class="nav-links">
-            <span class="nav-link active" id="nav-item-ai" onclick="showPage('ai')">Analyze</span>
-            <span class="nav-link" id="nav-item-about" onclick="showPage('about')">Project Info</span>
+            <span class="nav-link active" id="nav-item-ai" onclick="showPage('ai')">ai</span>
+            <span class="nav-link" id="nav-item-about" onclick="showPage('about')">About</span>
         </div>
     </nav>
 
